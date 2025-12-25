@@ -17,7 +17,7 @@ export function BasicTable({
         data,
         (d) => applySorting(d, { key: "name", direction: "asc" }),
         (d) => applyPagination(d, { page: 1, pageSize: 10 }),
-        (d) => applyFilters(d, [{ key: "name", value: 25 }])
+        (d) => applyFilters(d, [{ key: "name", value: "B" }])
     )
 
     const model = createTableModel(columns, rows)

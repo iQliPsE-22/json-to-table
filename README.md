@@ -1,150 +1,85 @@
-# Headless Table Engine (v0)
+# Headless Table Engine
 
-A small, headless table engine that converts column definitions + raw data into a render-ready table model, without coupling logic to UI.
+A powerful, headless table engine that transforms raw JSON data into a render-ready table model through a functional pipe. It handles filtering, sorting, and pagination without being coupled to any specific UI framework.
 
 ## The Problem
 
-In most frontend apps, table logic is tightly coupled to UI code.
+Table logic (data mapping, sorting algorithms, pagination math) is often mixed with UI components. This makes the code:
 
-This leads to:
+- Hard to test
+- Difficult to reuse across different UI frameworks
+- Brittle and complex (the "fat component" problem)
 
-- data mapping inside JSX
-- duplicated logic across tables
-- hard-to-test behavior
-- fragile refactors
-- messy components that do too much
+## The Solution: Data Pipeline
 
-Every new table becomes a custom implementation.
+`table-core` solves this by treating table state as a series of data transformations.
 
-## The Idea
-
-Separate table logic from table rendering.
-
-Instead of mixing data processing with UI, extract the logic into a pure function that produces a predictable model the UI can render.
-
-## What This Library Does (v0)
-
-At its core, this project exposes a single function:
-
-```javascript
-createTableModel(columns, data);
+```mermaid
+graph LR
+    Data[Raw JSON Data] --> Filters[applyFilters]
+    Filters --> Sort[applySorting]
+    Sort --> Paginate[applyPagination]
+    Paginate --> Model[createTableModel]
+    Model --> UI[Render-ready Model]
 ```
 
-It:
+## Features
 
-- takes column definitions
-- takes raw row data
-- returns a render-ready table model
+- **Headless**: Pure logic. No CSS, no JSX, no DOM. Works with React, Vue, Svelte, or Vanilla JS.
+- **Composable**: Use the functional `pipe` to chain transformations easily.
+- **Tested**: Comprehensive unit tests for every core transformation (24+ tests).
+- **Type-safe**: Built with TypeScript for excellent developer experience.
 
-- No React.
-- No JSX.
-- No styling.
+## Usage Example
 
-Just data → data.
+```typescript
+import {
+  pipe,
+  applyFilters,
+  applySorting,
+  applyPagination,
+  createTableModel,
+} from "./table-core";
 
-## What It Does NOT Do (Yet)
-
-v0 is intentionally minimal.
-
-It does not include:
-
-- sorting
-- pagination
-- filtering
-- selection
-- permissions
-- server-side logic
-
-These will be layered on top without changing the core API.
-
-## Example
-
-### Input
-
-```javascript
 const columns = [
-  { key: "name", label: "Name" },
-  { key: "email", label: "Email" },
+  { key: "name", label: "Full Name" },
+  { key: "age", label: "Age" },
 ];
 
-const data = [
-  { name: "A", email: "a@test.com" },
-  { name: "B", email: "b@test.com" },
+const rawData = [
+  { name: "Alice", age: 25 },
+  { name: "Bob", age: 30 },
+  { name: "Charlie", age: 20 },
+  // ... more data
 ];
+
+// Combine transformations into a single predictable model
+const tableModel = pipe(
+  rawData,
+  (data) => applyFilters(data, [{ key: "name", value: "a" }]), // Filter names containing 'a'
+  (data) => applySorting(data, { key: "age", direction: "asc" }), // Sort by age
+  (data) => applyPagination(data, { page: 1, pageSize: 10 }), // Get first 10 items
+  (data) => createTableModel(columns, data) // Transform to model
+);
+
+// tableModel is now ready to be rendered by any UI:
+// {
+//   headers: [{ key: "name", label: "Full Name" }, ...],
+//   rows: [{ key: "row-0", cells: [...] }, ...]
+// }
 ```
 
-### Core Logic
+## Running Tests
 
-```javascript
-const model = createTableModel(columns, data);
+The core engine is fully tested using Vitest:
+
+```bash
+# Run all tests
+npx vitest run table-core/__tests__
 ```
-
-### Output
-
-```json
-{
-  "headers": [
-    { "key": "name", "label": "Name" },
-    { "key": "email", "label": "Email" }
-  ],
-  "rows": [
-    {
-      "key": "row-0",
-      "cells": [
-        { "columnKey": "name", "value": "A" },
-        { "columnKey": "email", "value": "a@test.com" }
-      ]
-    }
-  ]
-}
-```
-
-Your UI simply renders this.
-
-## Why Headless?
-
-Because:
-
-- logic becomes reusable
-- UI stays simple
-- behavior is testable
-- the engine works with any framework
-
-React is just one consumer.
 
 ## Design Principles
 
-- Pure functions only
-- Deterministic output
-- No UI assumptions
-- Composable architecture
-- Small surface area
-
-If v0 is clean, everything built on top stays clean.
-
-## Who This Is For
-
-- developers building dashboards
-- internal tools
-- admin panels
-- data-heavy UIs
-- teams tired of copy-pasting table logic
-
-This is infrastructure, not a component library.
-
-## Roadmap (High-level)
-
-- v0: data → table model ✅
-- v1: sorting
-- v2: pagination
-- v3: filtering
-- v4: server-driven tables
-- v5: permissions & access control
-
-Each feature is layered without breaking the core.
-
-## Status
-
-Early-stage, experimental, intentionally minimal.
-
-The API is expected to evolve.
+- **Pure functions only**: Deterministic output given the same input.
+- **No UI assumptions**: Logic is completely separated from rendering.
+- **Immutability**: Transformations return new arrays/objects, keeping original data intact.

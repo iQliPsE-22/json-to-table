@@ -1,8 +1,8 @@
-import { Column, TableModel } from "./types"
+import { Column, TableModel } from "./types";
 
-export function createTableModel(
+export function createTableModel<T extends Record<string, unknown>>(
   columns: Column[],
-  data: Record<string, unknown>[]
+  data: T[]
 ): TableModel {
   return {
     headers: columns,
@@ -13,5 +13,5 @@ export function createTableModel(
         value: row[col.key],
       })),
     })),
-  }
+  };
 }
