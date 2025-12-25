@@ -6,7 +6,7 @@ export function createTableModel<T extends Record<string, unknown>>(
 ): TableModel {
   return {
     headers: columns,
-    rows: data.map((row, idx) => ({
+    rows: data?.map((row, idx) => ({
       key: `row-${idx}`,
       cells: columns.map((col) => ({
         columnKey: col.key,
