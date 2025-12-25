@@ -2,6 +2,8 @@
 
 A powerful, headless table engine that transforms raw JSON data into a render-ready table model through a functional pipe. It handles filtering, sorting, and pagination without being coupled to any specific UI framework.
 
+Official Repository: [github.com/iQliPsE-22/json-to-table](https://github.com/iQliPsE-22/json-to-table)
+
 ## Live Demo
 
 Check out the [Live Demo](http://localhost:3000/demo) to see the engine in action with a real dataset.
@@ -101,4 +103,4 @@ npm test
 
 ## License
 
-MIT © 2025 Deepa
+MIT © 2025 Deepak
