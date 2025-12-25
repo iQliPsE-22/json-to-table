@@ -2,17 +2,17 @@
 
 A powerful, headless table engine that transforms raw JSON data into a render-ready table model through a functional pipe. It handles filtering, sorting, and pagination without being coupled to any specific UI framework.
 
+## Live Demo
+
+Check out the [Live Demo](http://localhost:3000/demo) to see the engine in action with a real dataset.
+
 ## The Problem
 
-Table logic (data mapping, sorting algorithms, pagination math) is often mixed with UI components. This makes the code:
-
-- Hard to test
-- Difficult to reuse across different UI frameworks
-- Brittle and complex (the "fat component" problem)
+Table logic (data mapping, sorting algorithms, pagination math) is often mixed with UI components. This makes the code hard to test, difficult to reuse, and leads to "fat components".
 
 ## The Solution: Data Pipeline
 
-`table-core` solves this by treating table state as a series of data transformations.
+`table-core` treats table state as a series of pure data transformations.
 
 ```mermaid
 graph LR
@@ -25,10 +25,16 @@ graph LR
 
 ## Features
 
-- **Headless**: Pure logic. No CSS, no JSX, no DOM. Works with React, Vue, Svelte, or Vanilla JS.
-- **Composable**: Use the functional `pipe` to chain transformations easily.
-- **Tested**: Comprehensive unit tests for every core transformation (24+ tests).
+- **Headless**: Pure logic. No CSS, no JSX, no DOM. Works with any UI framework.
+- **Composable**: Use the functional `pipe` utility to chain transformations.
 - **Type-safe**: Built with TypeScript for excellent developer experience.
+- **Tested**: Comprehensive unit tests for every core transformation.
+
+## Installation
+
+```bash
+npm install table-core
+```
 
 ## Usage Example
 
@@ -42,44 +48,57 @@ import {
 } from "./table-core";
 
 const columns = [
-  { key: "name", label: "Full Name" },
-  { key: "age", label: "Age" },
+  { key: "id", label: "ID" },
+  { key: "title", label: "Product Name" },
+  { key: "price", label: "Price ($)" },
 ];
 
-const rawData = [
-  { name: "Alice", age: 25 },
-  { name: "Bob", age: 30 },
-  { name: "Charlie", age: 20 },
-  // ... more data
+const products = [
+  { id: 1, title: "iPhone 15", price: 999 },
+  { id: 2, title: "Samsung S24", price: 899 },
+  // ...
 ];
 
 // Combine transformations into a single predictable model
 const tableModel = pipe(
-  rawData,
-  (data) => applyFilters(data, [{ key: "name", value: "a" }]), // Filter names containing 'a'
-  (data) => applySorting(data, { key: "age", direction: "asc" }), // Sort by age
-  (data) => applyPagination(data, { page: 1, pageSize: 10 }), // Get first 10 items
-  (data) => createTableModel(columns, data) // Transform to model
+  products,
+  (data) => applyFilters(data, [{ key: "title", value: "iPhone" }]),
+  (data) => applySorting(data, { key: "price", direction: "desc" }),
+  (data) => applyPagination(data, { page: 1, pageSize: 5 }),
+  (data) => createTableModel(columns, data)
 );
-
-// tableModel is now ready to be rendered by any UI:
-// {
-//   headers: [{ key: "name", label: "Full Name" }, ...],
-//   rows: [{ key: "row-0", cells: [...] }, ...]
-// }
 ```
+
+## Core API
+
+### `pipe(value, ...fns)`
+
+A functional utility to chain data transformations. Each function in the chain receives the result of the previous one.
+
+### `applyFilters(data, filters)`
+
+Filters the dataset based on an array of key/value pairs. Supports case-insensitive string matching.
+
+### `applySorting(data, sortConfig)`
+
+Sorts the data based on a key and direction (`asc` | `desc`). Handles numbers and strings safely.
+
+### `applyPagination(data, { page, pageSize })`
+
+Slices the data to return a specific page.
+
+### `createTableModel(columns, data)`
+
+Transforms the processed data into a structured `TableModel` ready for rendering in any loop.
 
 ## Running Tests
 
 The core engine is fully tested using Vitest:
 
 ```bash
-# Run all tests
-npx vitest run table-core/__tests__
+npm test
 ```
 
-## Design Principles
+## License
 
-- **Pure functions only**: Deterministic output given the same input.
-- **No UI assumptions**: Logic is completely separated from rendering.
-- **Immutability**: Transformations return new arrays/objects, keeping original data intact.
+MIT © 2025 Deepa
