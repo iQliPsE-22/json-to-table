@@ -1,6 +1,7 @@
 "use client"
 
 import { createTableModel, Column } from "@/table-core"
+import { applyFilters } from "@/table-core/filters"
 import { applyPagination } from "@/table-core/pagination"
 import { pipe } from "@/table-core/pipe"
 import { applySorting } from "@/table-core/sorting"
@@ -15,7 +16,8 @@ export function BasicTable({
     const rows = pipe(
         data,
         (d) => applySorting(d, { key: "name", direction: "asc" }),
-        (d) => applyPagination(d, { page: 1, pageSize: 10 })
+        (d) => applyPagination(d, { page: 1, pageSize: 10 }),
+        (d) => applyFilters(d, [{ key: "name", value: 25 }])
     )
 
     const model = createTableModel(columns, rows)
