@@ -1,36 +1,150 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Headless Table Engine (v0)
 
-## Getting Started
+A small, headless table engine that converts column definitions + raw data into a render-ready table model, without coupling logic to UI.
 
-First, run the development server:
+## The Problem
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+In most frontend apps, table logic is tightly coupled to UI code.
+
+This leads to:
+
+- data mapping inside JSX
+- duplicated logic across tables
+- hard-to-test behavior
+- fragile refactors
+- messy components that do too much
+
+Every new table becomes a custom implementation.
+
+## The Idea
+
+Separate table logic from table rendering.
+
+Instead of mixing data processing with UI, extract the logic into a pure function that produces a predictable model the UI can render.
+
+## What This Library Does (v0)
+
+At its core, this project exposes a single function:
+
+```javascript
+createTableModel(columns, data);
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+It:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- takes column definitions
+- takes raw row data
+- returns a render-ready table model
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- No React.
+- No JSX.
+- No styling.
 
-## Learn More
+Just data → data.
 
-To learn more about Next.js, take a look at the following resources:
+## What It Does NOT Do (Yet)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+v0 is intentionally minimal.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+It does not include:
 
-## Deploy on Vercel
+- sorting
+- pagination
+- filtering
+- selection
+- permissions
+- server-side logic
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+These will be layered on top without changing the core API.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Example
+
+### Input
+
+```javascript
+const columns = [
+  { key: "name", label: "Name" },
+  { key: "email", label: "Email" },
+];
+
+const data = [
+  { name: "A", email: "a@test.com" },
+  { name: "B", email: "b@test.com" },
+];
+```
+
+### Core Logic
+
+```javascript
+const model = createTableModel(columns, data);
+```
+
+### Output
+
+```json
+{
+  "headers": [
+    { "key": "name", "label": "Name" },
+    { "key": "email", "label": "Email" }
+  ],
+  "rows": [
+    {
+      "key": "row-0",
+      "cells": [
+        { "columnKey": "name", "value": "A" },
+        { "columnKey": "email", "value": "a@test.com" }
+      ]
+    }
+  ]
+}
+```
+
+Your UI simply renders this.
+
+## Why Headless?
+
+Because:
+
+- logic becomes reusable
+- UI stays simple
+- behavior is testable
+- the engine works with any framework
+
+React is just one consumer.
+
+## Design Principles
+
+- Pure functions only
+- Deterministic output
+- No UI assumptions
+- Composable architecture
+- Small surface area
+
+If v0 is clean, everything built on top stays clean.
+
+## Who This Is For
+
+- developers building dashboards
+- internal tools
+- admin panels
+- data-heavy UIs
+- teams tired of copy-pasting table logic
+
+This is infrastructure, not a component library.
+
+## Roadmap (High-level)
+
+- v0: data → table model ✅
+- v1: sorting
+- v2: pagination
+- v3: filtering
+- v4: server-driven tables
+- v5: permissions & access control
+
+Each feature is layered without breaking the core.
+
+## Status
+
+Early-stage, experimental, intentionally minimal.
+
+The API is expected to evolve.
