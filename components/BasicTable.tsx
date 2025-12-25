@@ -2,6 +2,7 @@
 
 import { createTableModel, Column } from "@/table-core"
 import { applyPagination } from "@/table-core/pagination"
+import { pipe } from "@/table-core/pipe"
 import { applySorting } from "@/table-core/sorting"
 
 export function BasicTable({
@@ -11,13 +12,14 @@ export function BasicTable({
     columns: Column[]
     data: Record<string, unknown>[]
 }) {
-    // const model = createTableModel(columns, data)
-    // const sortedData = applySorting(data, { key: "age", direction: "asc" })
-    const paginatedData = applyPagination(data, {
-        page: 1,
-        pageSize: 2
-    })
-    const model = createTableModel(columns, paginatedData.rows)
+    const rows = pipe(
+        data,
+        (d) => applySorting(d, { key: "name", direction: "asc" }),
+        (d) => applyPagination(d, { page: 1, pageSize: 10 })
+    )
+
+    const model = createTableModel(columns, rows)
+
     return (
         <table>
             <thead>
